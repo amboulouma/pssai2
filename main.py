@@ -1,15 +1,12 @@
 #Example 1
 #Length of the schedule
 length_of_schedule = 7
-7
 
 #Number of Employees
 number_of_employees = 9
-9
 
 ##Number of Shifts
 number_of_shifts = 3
-3
 
 # Temporal Requirements Matrix
 temporal_requirements_matrix = [
