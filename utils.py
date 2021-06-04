@@ -54,6 +54,8 @@ def read_input(filename):
                     = ['-']*ns, [0]*ns, [0]*ns, [0]*ns, [0]*ns
                 for i in range(number_of_shifts):
                     shift_name[i], start_shift[i], length_shift[i], min_length_of_blocks[i], max_length_of_blocks[i] = next(lines).split()
+                    start_shift[i], length_shift[i] = list(map(int, start_shift[i])), list(map(int, length_shift[i]))
+                min_length_of_blocks, max_length_of_blocks = [int(x) for x in min_length_of_blocks], [int(x) for x in max_length_of_blocks] 
             if "# Minimum and maximum length of days-off blocks" in line:
                 min_days_off, max_days_off = list(map(int, next(lines).split()))
             if "# Minimum and maximum length of work blocks" in line:
@@ -63,9 +65,9 @@ def read_input(filename):
             if "# Not allowed shift sequences" in line:
                 not_allowed_shift_sequences_2, not_allowed_shift_sequences_3 = [], []
                 for i in range(nr_sequences_of_length_2):
-                    not_allowed_shift_sequences_2.append(next(lines).split('\n')[0])
+                    not_allowed_shift_sequences_2.append(next(lines).split('\n')[0].split())
                 for i in range(nr_sequences_of_length_3):
-                    not_allowed_shift_sequences_3.append(next(lines).split('\n')[0])
+                    not_allowed_shift_sequences_3.append(next(lines).split('\n')[0].split())
 
     input_data = {
         'length_of_schedule': length_of_schedule,
