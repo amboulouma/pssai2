@@ -12,4 +12,6 @@ for e in range(input_data['number_of_employees']):
     for d in range(input_data['length_of_schedule']):
         result[e][d] = 'D'
 
+pprint(input_data)
+
 pprint(result)
