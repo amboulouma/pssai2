@@ -1,3 +1,5 @@
+from pprint import pprint
+
 #Example 1
 #Length of the schedule
 length_of_schedule = 7
@@ -8,7 +10,7 @@ number_of_employees = 9
 ##Number of Shifts
 number_of_shifts = 3
 
-# Temporal Requirements Matrix
+# Temporal Requirements Matrix Shifts per Days
 temporal_requirements_matrix = [
         [2,2,2,2,2,2,2],
         [2,2,2,3,3,3,2],
@@ -35,3 +37,12 @@ nr_sequences_of_length_3 = 0
 not_allowed_shif_sequences = [
     ['N', 'D'], ['N', 'A'], ['A', 'D']
 ]
+
+# Results Employees per days
+result = [['-']*length_of_schedule]*number_of_employees
+
+for e in range(number_of_employees):
+    for d in range(length_of_schedule):
+        result[e][d] = 'D'
+
+pprint(result)
