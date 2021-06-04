@@ -23,14 +23,21 @@ nf3     = input_data['nr_sequences_of_length_3']
 f2      = input_data['not_allowed_shift_sequences_2']
 f3      = input_data['not_allowed_shift_sequences_3']
 
-# def 
+shifts = ns + 1
+day, afternoon, night, dayoff = 1, 2, 3, 4
+code = sn + ['-']
+
+def demand_constraint(input_data, result):
+    return None
 
 def calculate_result(input_data):
-    result = [['-']*input_data['length_of_schedule']]*input_data['number_of_employees']
+    result = [['-']*days]*ne
 
-    for e in range(input_data['number_of_employees']):
-        for d in range(input_data['length_of_schedule']):
+    for e in range(ne):
+        for d in range(days):
             result[e][d] = 'D'
+
+    demand_constraint(input_data, result)
 
     return result
 
