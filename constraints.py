@@ -8,7 +8,7 @@ input_data = read_data(FILENAME)
 days    = input_data['length_of_schedule']
 ne      = input_data['number_of_employees']
 ns      = input_data['number_of_shifts']
-trm     = input_data['temporal_requirements_matrix']
+demand  = input_data['temporal_requirements_matrix']
 sn      = input_data['shift_name']
 ss      = input_data['start_shift']
 ls      = input_data['length_shift']
@@ -27,10 +27,14 @@ shifts = ns + 1
 day, afternoon, night, dayoff = 1, 2, 3, 4
 code = sn + ['-']
 
-def demand_constraint(input_data, result):
+def demand_constraint(result):
+    for e in range(ne):
+        for d in range(days):
+            if demand[1][d] > sum([x == 'D' for x in result]):
+                pass
     return None
 
-def calculate_result(input_data):
+def calculate_result():
     result = [['-']*days]*ne
 
     for e in range(ne):
