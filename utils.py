@@ -47,7 +47,7 @@ def read_input(filename):
                 ns = number_of_shifts
                 temporal_requirements_matrix = []
                 for i in range(number_of_shifts):
-                    temporal_requirements_matrix.append(str(next(lines)))
+                    temporal_requirements_matrix.append(list(map(int, next(lines).split())))
             if "#ShiftName" in line:
                 ns = number_of_shifts
                 shift_name, start_shift, length_shift, min_length_of_blocks, max_length_of_blocks \
