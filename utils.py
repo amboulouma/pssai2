@@ -1,6 +1,6 @@
 from pprint import pprint
 
-def read_input(filename):
+def read_data(filename):
     input_data = {}
     #Length of the schedule
     length_of_schedule = 0
@@ -90,6 +90,3 @@ def read_input(filename):
     }
 
     return input_data 
-
-pprint(read_input('rws_instances/Example1.txt'))
-pprint(read_input('rws_instances/Example4.txt'))
