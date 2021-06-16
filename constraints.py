@@ -1,9 +1,9 @@
 from pprint import pprint
 
-from utils import *
+from utils import read_data
+from constants import FILENAME_EXAMPLE_1
 
-FILENAME = 'rws_instances/Example1.txt'
-input_data = read_data(FILENAME)
+input_data = read_data(FILENAME_EXAMPLE_1)
 
 days    = input_data['length_of_schedule']
 ne      = input_data['number_of_employees']
@@ -32,7 +32,7 @@ def demand_constraint(result):
         for d in range(days):
             if demand[1][d] > sum([x == 'D' for x in result]):
                 pass
-    return None
+    return result
 
 def calculate_result(input_data):
     result = [['-']*days]*ne
@@ -41,7 +41,7 @@ def calculate_result(input_data):
         for d in range(days):
             result[e][d] = 'D'
 
-    demand_constraint(result)
+    result = demand_constraint(result)
 
     return result
 
