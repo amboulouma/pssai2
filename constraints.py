@@ -34,17 +34,17 @@ def demand_constraint(result):
                 pass
     return None
 
-def calculate_result():
+def calculate_result(input_data):
     result = [['-']*days]*ne
 
     for e in range(ne):
         for d in range(days):
             result[e][d] = 'D'
 
-    demand_constraint(input_data, result)
+    demand_constraint(result)
 
     return result
 
 pprint(input_data)
 
-pprint(calculate_result(input_data))  
+pprint(calculate_result(input_data))
