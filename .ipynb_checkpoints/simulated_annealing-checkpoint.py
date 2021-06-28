@@ -118,17 +118,23 @@ def generate_random_solution(input_data):
 
 # %%
 def demand_constraint(result, input_data):
-    print(input_data)
     for e in range(input_data['number_of_employees']):
         for d in range(input_data['length_of_schedule']):
             sum_day, sum_afternoon, sum_night = 0, 0, 0
             if result[e][d] == 'D': sum_day += 1
             elif result[e][d] == 'A': sum_afternoon += 1
-            elif result[e][d] == 'N': sum_night += 1        
-        if sum_day >= input_data['temporal_requirements_matrix'][0][d] and sum_afternoon >= input_data['temporal_requirements_matrix'][1][d] and sum_night >= input_data['temporal_requirements_matrix'][2][d]:
-            pass
+            elif result[e][d] == 'N': sum_night += 1    
+        
+        if input_data['number_of_shifts'] > 2 :
+            if  sum_day >= input_data['temporal_requirements_matrix'][0][d] and sum_afternoon >= input_data['temporal_requirements_matrix'][1][d] and sum_night >= input_data['temporal_requirements_matrix'][2][d]:
+                pass
+            else:
+                return False
         else:
-            return False
+            if  sum_day >= input_data['temporal_requirements_matrix'][0][d] and sum_afternoon >= input_data['temporal_requirements_matrix'][1][d]:
+                pass
+            else:
+                return False
     return True
 
 
@@ -201,8 +207,9 @@ def update_demand_constraint(result, input_data):
         else: updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'D'
         if sum_afternoon >= input_data['temporal_requirements_matrix'][1][d]: pass
         else: updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'A'
-        if sum_night >= input_data['temporal_requirements_matrix'][2][d]: pass
-        else: updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'N'
+        if input_data['number_of_shifts'] > 2 :
+            if sum_night >= input_data['temporal_requirements_matrix'][2][d]: pass
+            else: updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'N'
     return updated_result
 
 
@@ -315,6 +322,13 @@ def update_length_work_blocks_constraint(result, input_data):
                 
     return updated_result 
 
+
+# %%
+def move_length_work_blocks_constraint(result, input_data):
+    updated_result = deepcopy(result)
+    code = input_data['shift_name'] + ['-']
+    
+    updated_result
 
 # %%
 
@@ -449,7 +463,7 @@ def simulated_annealing(input_data, T_max, r, termination_condition, halting_con
         T *= r    
         hc += 1
         
-    return "Not satified in the given time"
+    return "Not satified in the given time", solution
 
 
 # %%
@@ -559,9 +573,12 @@ def test_SA():
         input_data = read_data(example)
         solution = generate_random_solution(input_data)
         solution = simulated_annealing(input_data, T_max, r, termination_condition, halting_condition)
-        if solution != "Not satified in the given time":
+        if "Not satified in the given time" not in solution:
             print(eval_solution(solution, input_data))
+            print('passed')
         else: 
-            print(solution)
-        print('passed')
+            message, solution = solution
+            print(f'{message}. Best solution found has a score of: {eval_solution(solution, input_data)}')
+            print('Not passed')
+        
 
