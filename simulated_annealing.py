@@ -221,7 +221,9 @@ def move_day_demand_constraint(result, input_data):
         for e in range(input_data['number_of_employees']):
             if updated_result[e][d] == 'D': sum_day += 1
         if sum_day >= input_data['temporal_requirements_matrix'][0][d]: pass
-        else: updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'D'
+        else: 
+            updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'D'
+            break
     return updated_result
 
 
@@ -233,19 +235,24 @@ def move_afternoon_demand_constraint(result, input_data):
         for e in range(input_data['number_of_employees']):
             if updated_result[e][d] == 'A': sum_afternoon += 1
         if sum_afternoon >= input_data['temporal_requirements_matrix'][0][d]: pass
-        else: updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'A'
+        else: 
+            updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'A'
+            break
     return updated_result
 
 
 # %%
 def move_night_demand_constraint(result, input_data):
     updated_result = deepcopy(result)
+    if input_data['number_of_shifts'] < 3 : return updated_result
     for d in range(input_data['length_of_schedule']):
         sum_night = 0
         for e in range(input_data['number_of_employees']):
             if updated_result[e][d] == 'N': sum_night += 1
         if sum_night >= input_data['temporal_requirements_matrix'][0][d]: pass
-        else: updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'N'
+        else: 
+            updated_result[random.randint(0, input_data['number_of_employees']-1)][d] = 'N'
+            break
     return updated_result
 
 # %%
@@ -276,7 +283,9 @@ def move_min_day_off_constraint(result, input_data):
         for d in range(input_data['length_of_schedule']):
             if updated_result[e][d] == '-': count_dayoff += 1
         if count_dayoff >= input_data['min_days_off']: pass
-        else: updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = '-'
+        else: 
+            updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = '-'
+            break
     return updated_result
 
 
@@ -289,7 +298,10 @@ def move_max_day_off_constraint(result, input_data):
         for d in range(input_data['length_of_schedule']):
             if updated_result[e][d] == '-': count_dayoff += 1
         if count_dayoff <= input_data['max_days_off']: pass
-        else: updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = random.choice(list(set(code) - set('-')))            
+        else: 
+            updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = random.choice(list(set(code) - set('-')))
+            break
+        
     return updated_result
 
 
@@ -324,13 +336,63 @@ def update_length_work_blocks_constraint(result, input_data):
 
 
 # %%
-def move_length_work_blocks_constraint(result, input_data):
+def move_min_length_work_blocks_constraint(result, input_data):
     updated_result = deepcopy(result)
     code = input_data['shift_name'] + ['-']
     
-    updated_result
+    for e in range(input_data['number_of_employees']):
+        count_consecutive = 0
+        min_flag, max_flag = False, False
+        for d in range(input_data['length_of_schedule'] - 1):
+            if updated_result[e][d] != '-' and updated_result[e][d+1] != '-': 
+                count_consecutive += 1
+                if count_consecutive >= input_data['min_length_work_blocks'] - 1:
+                    min_flag = True
+                    if count_consecutive <= input_data['max_length_work_blocks'] - 1:
+                        max_flag = True
+            else:  count_consecutive = 0
+            
+        if min_flag: pass
+        else: 
+            count_concecutive = 0
+            for d in range(input_data['length_of_schedule']):
+                if updated_result[e][d] == '-' and count_concecutive <= input_data['max_length_work_blocks'] - 1: 
+                    updated_result[e][d] = random.choice(list(set(code) - set('-')))
+                    return updated_result
+                count_concecutive += 1
+    return updated_result
+
 
 # %%
+def move_max_length_work_blocks_constraint(result, input_data):
+    updated_result = deepcopy(result)
+    code = input_data['shift_name'] + ['-']
+    
+    for e in range(input_data['number_of_employees']):
+        count_consecutive = 0
+        min_flag, max_flag = False, False
+        for d in range(input_data['length_of_schedule'] - 1):
+            if updated_result[e][d] != '-' and updated_result[e][d+1] != '-': 
+                count_consecutive += 1
+                if count_consecutive >= input_data['min_length_work_blocks'] - 1:
+                    min_flag = True
+                    if count_consecutive <= input_data['max_length_work_blocks'] - 1:
+                        max_flag = True
+            else:  count_consecutive = 0
+            
+        if min_flag: pass
+        else: 
+            count_concecutive = 0
+            for d in range(input_data['length_of_schedule']):
+                if updated_result[e][d] == '-' and count_concecutive <= input_data['max_length_work_blocks'] - 1: 
+                    pass
+                count_concecutive += 1
+        if max_flag: pass
+        else: 
+            updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = '-'
+            return updated_result
+        
+    return updated_result
 
 
 # %%
@@ -347,13 +409,32 @@ def update_forbidden_constraint2(result, input_data):
                         for c in code:
                             if [f[0], c] not in input_data['not_allowed_shift_sequences_2']:
                                 updated_result[e][d+1] = c
-                                break
+                                return updated_result
         return updated_result
 
 
 # %%
 #forbidden shifts constraint
-def update_forbidden_constraint2_2(result, input_data):
+def move_0_forbidden_constraint2(result, input_data):
+    updated_result = deepcopy(result)
+    code = input_data['shift_name'] + ['-']
+    move_flage = False
+    if input_data['not_allowed_shift_sequences_2'] == []: return updated_result
+    if input_data['not_allowed_shift_sequences_2'] != []:
+        for e in range(input_data['number_of_employees']):
+            for d in range(input_data['length_of_schedule'] - 1):
+                for f in input_data['not_allowed_shift_sequences_2']:
+                    if updated_result[e][d] == f[0] and updated_result[e][d+1] == f[1]:
+                        for c in code:
+                            if [f[0], c] not in input_data['not_allowed_shift_sequences_2']:
+                                updated_result[e][d+1] = c
+                                return updated_result
+        return updated_result
+
+
+# %%
+#forbidden shifts constraint
+def move_1_forbidden_constraint2(result, input_data):
     updated_result = deepcopy(result)
     code = input_data['shift_name'] + ['-']
     if input_data['not_allowed_shift_sequences_2'] == []: return updated_result
@@ -365,7 +446,7 @@ def update_forbidden_constraint2_2(result, input_data):
                         for c in code:
                             if [c, f[1]] not in input_data['not_allowed_shift_sequences_2']:
                                 updated_result[e][d] = c
-                                break
+                                return updated_result
         return updated_result
 
 
@@ -388,6 +469,24 @@ def update_forbidden_constraint3(result, input_data):
 
 
 # %%
+def move_0_forbidden_constraint3(result, input_data):
+    updated_result = deepcopy(result)
+    code = input_data['shift_name'] + ['-']
+    if input_data['not_allowed_shift_sequences_3'] == []: return updated_result
+    if input_data['not_allowed_shift_sequences_3'] != []:
+        for e in range(input_data['number_of_employees']):
+            for d in range(input_data['length_of_schedule'] - 2):
+                for f in input_data['not_allowed_shift_sequences_3']:
+                    if result[e][d] == f[0] and result[e][d+1] == f[1]                                             and result[e][d+2] == f[2]: 
+                        for c in code:
+                            if [c, f[1], f[2]] not in input_data['not_allowed_shift_sequences_3']:
+                                updated_result[e][d] = c
+                                return updated_result
+                            
+        return updated_result
+
+
+# %%
 def update_forbidden_constraint3_2(result, input_data):
     updated_result = deepcopy(result)
     code = input_data['shift_name'] + ['-']
@@ -404,6 +503,41 @@ def update_forbidden_constraint3_2(result, input_data):
                             
         return updated_result
 
+
+# %%
+def move_1_forbidden_constraint3(result, input_data):
+    updated_result = deepcopy(result)
+    code = input_data['shift_name'] + ['-']
+    if input_data['not_allowed_shift_sequences_3'] == []: return updated_result
+    if input_data['not_allowed_shift_sequences_3'] != []:
+        for e in range(input_data['number_of_employees']):
+            for d in range(input_data['length_of_schedule'] - 2):
+                for f in input_data['not_allowed_shift_sequences_3']:
+                    if result[e][d] == f[0] and result[e][d+1] == f[1]                                             and result[e][d+2] == f[2]: 
+                        for c in code:
+                            if [f[0], c, f[2]] not in input_data['not_allowed_shift_sequences_3']:
+                                updated_result[e][d] = c
+                                return updated_result
+                            
+        return updated_result
+
+
+# %%
+def move_2_forbidden_constraint3(result, input_data):
+    updated_result = deepcopy(result)
+    code = input_data['shift_name'] + ['-']
+    if input_data['not_allowed_shift_sequences_3'] == []: return updated_result
+    if input_data['not_allowed_shift_sequences_3'] != []:
+        for e in range(input_data['number_of_employees']):
+            for d in range(input_data['length_of_schedule'] - 2):
+                for f in input_data['not_allowed_shift_sequences_3']:
+                    if result[e][d] == f[0] and result[e][d+1] == f[1]                                             and result[e][d+2] == f[2]: 
+                        for c in code:
+                            if [f[0], f[1], c] not in input_data['not_allowed_shift_sequences_3']:
+                                updated_result[e][d] = c
+                                return updated_result
+                            
+        return updated_result
 
 # %%
 
@@ -436,63 +570,44 @@ def simulated_annealing(input_data, T_max, r, termination_condition, halting_con
     score = 100
     T = T_max
     
+    k = 0
+
     solution = generate_random_solution(input_data)
+    best_solution = deepcopy(solution)
     
     while hc < halting_condition:
         while tc < termination_condition:
             if eval_solution(solution, input_data) == 100: 
-                return solution
+                return solution, best_solution
+
+            moves = [
+                move_day_demand_constraint,
+                move_afternoon_demand_constraint,
+                move_night_demand_constraint,
+                move_min_day_off_constraint,
+                move_max_day_off_constraint,
+                move_min_length_work_blocks_constraint,
+                move_max_length_work_blocks_constraint,
+                move_0_forbidden_constraint2,
+                move_1_forbidden_constraint2,
+                move_0_forbidden_constraint3,
+                move_1_forbidden_constraint3,
+                move_2_forbidden_constraint3
+            ]
+
+            move = random.choice(moves)(solution, input_data)
+
+            if eval_solution(solution, input_data) < eval_solution(move, input_data): solution = move
+            elif random.uniform(0, 1) < exp_probability(solution, move, T, input_data): solution = move
             
-            n1 = update_forbidden_constraint3(solution, input_data)
-            n2 = update_forbidden_constraint3_2(solution, input_data)
-            n3 = update_forbidden_constraint2(solution, input_data)
-            n4 = update_forbidden_constraint2_2(solution, input_data)
-            n5 = update_length_work_blocks_constraint(solution, input_data)
-            n6 = update_day_off_constraint(solution, input_data)
-            n7 = update_demand_constraint(solution, input_data)
-
-            neighborhood = [n1, n2, n3, n4, n5, n6, n7]
-
-            neighbor = random.choice(neighborhood)
-
-            if eval_solution(solution, input_data) < eval_solution(neighbor, input_data): solution = neighbor
-            elif random.uniform(0, 1) < exp_probability(solution, neighbor, T, input_data): solution = neighbor
-            
+            if eval_solution(solution, input_data) > eval_solution(best_solution, input_data):
+                best_solution = deepcopy(solution)
             tc += 1
             
         T *= r    
         hc += 1
         
-    return "Not satified in the given time", solution
-
-
-# %%
-
-
-def eval_SA_params(input_data, T_max, tc_max, hc_max, time_limit):
-    print(f"Running SA on {input_data['filename']}")
-    params = []
-    start_time_limit = time.time()
-    for T in range(1, T_max):
-        end_time_limit = time.time()
-        if end_time_limit - start_time_limit > time_limit:
-            break
-        for hc in range(1, hc_max):
-            end_time_limit = time.time()
-            if end_time_limit - start_time_limit > time_limit:
-                break
-            for tc in range(1, tc_max):
-                end_time_limit = time.time()
-                if end_time_limit - start_time_limit > time_limit:
-                    print(f'Exceeded time limit of {time_limit} seconds.')
-                    break
-                start = time.time()
-                solution = simulated_annealing(input_data, T, 0.99, tc, hc)
-                end = time.time()
-                if solution != "Not satified in the given time":
-                    print(f'Parameters solution T={T}\tr={0.99}\ttermination_condition={tc}\thalting_condition={hc}\tRuntime {end - start}')
-                    params.append((T, r/100, tc, hc, end - start))
-    return params
+    return "Not satified in the given time", solution, best_solution
 
 
 # %%
@@ -511,74 +626,21 @@ def get_examples():
 # %%
 
 
-def run_SA_eval_on_examples():
-    T = 100
-    tc = 100
-    hc = 100
-    time_limit = 100
-    params = {}
-    for example in get_examples():
-        input_data = read_data(example)
-        input_data['filename'] = example
-        params[example] = eval_SA_params(input_data, T, tc, hc, time_limit)
-        
-    return params
-
-
-# %%
-
-
-def run_SA_on_examples():
-    T = 100
-    r = 0.99
-    tc = 1000
-    hc = 1000
-    solutions = {}
-    for example in get_examples():
-        solution = simulated_annealing(read_data(example), T, r/100, tc, hc)
-        print(example)
-        pprint(solution)
-        solutions[example] = solution
-
-
-# %%
-
-
-def test_reading_input():
-    for example in get_examples():
-        print(example)
-        pprint(read_data(example))
-
-
-# %%
-
-
-def test_constraints():
-    for example in get_examples():
-        print(example)
-        solution = generate_random_solution(read_data(example))
-        pprint(eval_solution(solution, read_data(example)))
-
-
-# %%
-
-
-def test_SA():
-    T_max = 100
-    r = 0.99
-    termination_condition = 1000
-    halting_condition = 1000000
+def test_SA(T_max, r, termination_condition, halting_condition):
     for example in get_examples():
         print(example)
         input_data = read_data(example)
         solution = generate_random_solution(input_data)
         solution = simulated_annealing(input_data, T_max, r, termination_condition, halting_condition)
         if "Not satified in the given time" not in solution:
-            print(eval_solution(solution, input_data))
+            solution, best_solution = solution
+            print(f'Best solution: {eval_solution(best_solution, input_data)}')
+            print(f'Last solution: {eval_solution(solution, input_data)}')
             print('passed')
         else: 
-            message, solution = solution
-            print(f'{message}. Best solution found has a score of: {eval_solution(solution, input_data)}')
-            print('Not passed')
+            message, solution, best_solution = solution
+            print(f'{message}. Best solution found has a score of: {eval_solution(best_solution, input_data)}')
+            print(f'Last solution: {eval_solution(solution, input_data)}')
+            print('passed')
         
 
