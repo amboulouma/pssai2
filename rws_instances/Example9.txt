@@ -4,7 +4,7 @@
 #Number of Employees
 47
 
-#Number of Shifts
+##Number of Shifts
 3
 
 # Temporal Requirements Matrix
@@ -12,7 +12,7 @@
 15 15 15 15 15 6 0
 9 9 9 9 6 0 9 
 
-#ShiftName, Start, Length, Name, MinlengthOfBlocks, MaxLengthOfBlocks
+#ShiftName, Start, Length, MinlengthOfBlocks, MaxLengthOfBlocks
 D  360 480 2 7
 A  840 480 2 7
 N  1320 480 2 6
