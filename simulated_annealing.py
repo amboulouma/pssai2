@@ -34,8 +34,6 @@ def simulated_annealing(input_data, T_max, r, termination_condition, halting_con
     score = 100
     T = T_max
     
-    k = 0
-
     solution = generate_random_solution(input_data)
     best_solution = deepcopy(solution)
     
@@ -111,3 +109,27 @@ def test_SA(T_max, r, termination_condition, halting_condition, show_non_optimal
                 print()
     return best_solutions
 
+
+# %%
+def test_SA_per_example(example, T_max, r, termination_condition, halting_condition, show_non_optimal):
+    if show_non_optimal:
+        print(example)
+    input_data = read_data(example)
+    solution = generate_random_solution(input_data)
+    solution = simulated_annealing(input_data, T_max, r, termination_condition, halting_condition)
+    if "Not satified in the given time" not in solution:
+        if not show_non_optimal:
+            print(example)
+        solution, best_solution = solution
+        best_solutions.append((example, best_solution, eval_solution(best_solution, input_data)))
+        print(f'Best solution: {eval_solution(best_solution, input_data)}')
+        print(f'Last solution: {eval_solution(solution, input_data)}')
+        print('passed')
+        print()
+    else: 
+        if show_non_optimal:
+            message, solution, best_solution = solution
+            print(f'{message}. Best solution found has a score of: {eval_solution(best_solution, input_data)}')
+            print(f'Last solution: {eval_solution(solution, input_data)}')
+            print('passed')
+            print()
