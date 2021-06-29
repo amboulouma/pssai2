@@ -51,8 +51,34 @@ def day_off_constraint(result, input_data):
         count_day_off = 0
         for d in range(input_data['length_of_schedule']):
             if result[e][d] == '-': count_day_off += 1
-        if count_day_off >= input_data['min_days_off'] and count_day_off <= input_data['max_days_off']: pass
-        else: return False
+        if count_day_off >= input_data['min_days_off'] and count_day_off <= input_data['max_days_off']: 
+            continue
+        else: 
+            return False
+    return True
+
+def min_day_off_constraint(result, input_data):
+    count_day_off = 0
+    for e in range(input_data['number_of_employees']):
+        count_day_off = 0
+        for d in range(input_data['length_of_schedule']):
+            if result[e][d] == '-': count_day_off += 1
+        if count_day_off >= input_data['min_days_off']: 
+            continue
+        else: 
+            return False
+    return True
+
+def max_day_off_constraint(result, input_data):
+    count_day_off = 0
+    for e in range(input_data['number_of_employees']):
+        count_day_off = 0
+        for d in range(input_data['length_of_schedule']):
+            if result[e][d] == '-': count_day_off += 1
+        if count_day_off <= input_data['max_days_off']: 
+            continue
+        else: 
+            return False
     return True
 
 def length_work_blocks_constraint(result, input_data):
@@ -68,6 +94,35 @@ def length_work_blocks_constraint(result, input_data):
                         max_flag = True
             else:  count_consecutive = 0
         if min_flag and max_flag: pass
+        else: return False
+    return True
+
+def min_length_work_blocks_constraint(result, input_data):
+    for e in range(input_data['number_of_employees']):
+        count_consecutive = 0
+        min_flag = False
+        for d in range(input_data['length_of_schedule'] - 1):
+            if result[e][d] != '-' and result[e][d+1] != '-': 
+                count_consecutive += 1
+                if count_consecutive >= input_data['min_length_work_blocks'] - 1:
+                    min_flag = True
+            else: count_consecutive = 0
+        if min_flag: continue
+        else: return False
+    return True
+
+def max_length_work_blocks_constraint(result, input_data):
+    for e in range(input_data['number_of_employees']):
+        count_consecutive = 0
+        max_flag = False
+        for d in range(input_data['length_of_schedule'] - 1):
+            if result[e][d] != '-' and result[e][d+1] != '-': 
+                count_consecutive += 1
+                if count_consecutive >= input_data['min_length_work_blocks'] - 1:
+                    if count_consecutive <= input_data['max_length_work_blocks'] - 1:
+                        max_flag = True
+            else: count_consecutive = 0
+        if max_flag: continue
         else: return False
     return True
 
@@ -154,19 +209,43 @@ def eval_solution_4(solution, input_data):
     
     return score
 
-def report_solution(solution, input_data):
-    c1, c2, c3, c4, c5 = (demand_constraint,                          
-                        day_off_constraint,                          
-                        length_work_blocks_constraint,                         
-                        forbidden_constraint2,                          
+def eval_solution_5(solution, input_data):
+    score = 0
+    c1, c2, c3, c4, c5, c6, c7, c8, c9 = (demand_day_constraint,                          
+                        demand_afternoon_constraint,                          
+                        demand_night_constraint,                         
+                        min_day_off_constraint,                          
+                        max_day_off_constraint,
+                        min_length_work_blocks_constraint,
+                        max_length_work_blocks_constraint,
+                        forbidden_constraint2,
                         forbidden_constraint3)
+
+    if c1(solution, input_data): score += 20
+    if c2(solution, input_data): score += 20
+    if c3(solution, input_data): score += 20
+    if c4(solution, input_data): score += 10
+    if c5(solution, input_data): score += 5
+    if c6(solution, input_data): score += 10
+    if c7(solution, input_data): score += 5
+    if c8(solution, input_data): score += 5
+    if c9(solution, input_data): score += 5
+
+    
+    return score
+
+def report_solution(solution, input_data):
     return {
         'demand_constraint': demand_constraint(solution, input_data),
         'demand_day_constraint': demand_day_constraint(solution, input_data),
         'demand_afternoon_constraint': demand_afternoon_constraint(solution, input_data),
         'demand_night_constraint': demand_night_constraint(solution, input_data),
         'day_off_constraint': day_off_constraint(solution, input_data),
+        'min_day_off_constraint': min_day_off_constraint(solution, input_data),
+        'max_day_off_constraint': max_day_off_constraint(solution, input_data),
         'length_work_blocks_constraint': length_work_blocks_constraint(solution, input_data),
+        'min_length_work_blocks_constraint': min_length_work_blocks_constraint(solution, input_data),
+        'max_length_work_blocks_constraint': max_length_work_blocks_constraint(solution, input_data),
         'forbidden_constraint2': forbidden_constraint2(solution, input_data),
         'forbidden_constraint3': forbidden_constraint3(solution, input_data)
     }
@@ -310,33 +389,36 @@ def move_all_day_off_constraint(result, input_data):
                     count_day_off -= 1        
     return updated_result
 
-def day_off_constraint(result, input_data):
-    count_day_off = 0
-    for e in range(input_data['number_of_employees']):
-        count_day_off = 0
-        for d in range(input_data['length_of_schedule']):
-            if result[e][d] == '-': count_day_off += 1
-        if count_day_off >= input_data['min_days_off'] and count_day_off <= input_data['max_days_off']: 
-            continue
-        else: 
-            return False
-    return True
-
-
-def move_max_day_off_constraint(result, input_data):
+def move_min_day_off_constraint(result, input_data):
+    count_day_off, min_days_off, max_days_off = 0,input_data['min_days_off'],input_data['max_days_off']
     updated_result = deepcopy(result)
     if not day_off_constraint(updated_result, input_data):
-        updated_result = deepcopy(result)
         code = input_data['shift_name'] + ['-']
         for e in range(input_data['number_of_employees']):
-            count_dayoff = 0
+            count_day_off = 0
             for d in range(input_data['length_of_schedule']):
-                if updated_result[e][d] == '-': count_dayoff += 1
-            if count_dayoff <= input_data['max_days_off']: pass
+                if updated_result[e][d] == '-': count_day_off += 1
+            if count_day_off >= input_data['min_days_off']: pass
             else: 
-                updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = random.choice(list(set(code) - set('-')))
-                break
-        
+                while count_day_off <= min_days_off:
+                    updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = '-'
+                    count_day_off += 1    
+    return updated_result
+
+def move_max_day_off_constraint(result, input_data):
+    count_day_off, min_days_off, max_days_off = 0,input_data['min_days_off'],input_data['max_days_off']
+    updated_result = deepcopy(result)
+    if not day_off_constraint(updated_result, input_data):
+        code = input_data['shift_name'] + ['-']
+        for e in range(input_data['number_of_employees']):
+            count_day_off = 0
+            for d in range(input_data['length_of_schedule']):
+                if updated_result[e][d] == '-': count_day_off += 1
+            if count_day_off <= input_data['max_days_off']: pass
+            else: 
+                while count_day_off >= max_days_off:
+                    updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = random.choice(list(set(code) - set('-')))            
+                    count_day_off -= 1 
     return updated_result
 
 def move_all_length_work_blocks_constraint(result, input_data):
