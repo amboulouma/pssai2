@@ -4,6 +4,8 @@ import math
 from copy import deepcopy
 import time
 import traceback
+import collections
+
 
 import numpy as np
 
@@ -44,6 +46,30 @@ def shift_to_index(shift):
     elif shift == 'N': return 2
     elif shift == '-': return 3
     return False
+
+def min_length_of_shift_constraint(result, input_data):
+    for e in range(input_data['number_of_employees']):  
+        counter = collections.Counter(result[e])
+        for s in range(input_data['number_of_shifts']):
+            if index_to_shift(s) in counter:
+                if input_data['min_length_of_blocks'][s] <= counter[index_to_shift(s)]:
+                    continue
+                else:
+                    return False
+            else:
+                return False
+    return True 
+
+def max_length_of_shift_constraint(result, input_data):
+    for e in range(input_data['number_of_employees']):  
+        counter = collections.Counter(result[e])
+        for s in range(input_data['number_of_shifts']):
+            if index_to_shift(s) in counter:
+                if input_data['max_length_of_blocks'][s] >= counter[index_to_shift(s)]:
+                    continue
+                else:
+                    return False
+    return True 
 
 
 def day_off_constraint(result, input_data):
@@ -146,8 +172,36 @@ def forbidden_constraint3(result, input_data):
 
 # %% Evaluation
 
-
 def eval_solution(solution, input_data):
+    score = 0
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11 = (demand_day_constraint,                          
+                        demand_afternoon_constraint,                          
+                        demand_night_constraint,                         
+                        min_day_off_constraint,                          
+                        max_day_off_constraint,
+                        min_length_work_blocks_constraint,
+                        max_length_work_blocks_constraint,
+                        forbidden_constraint2,
+                        forbidden_constraint3,
+                        min_length_of_shift_constraint,
+                        max_length_of_shift_constraint)
+
+    if c1(solution, input_data): score += 10
+    if c2(solution, input_data): score += 10
+    if c3(solution, input_data): score += 10
+    if c4(solution, input_data): score += 10
+    if c5(solution, input_data): score += 10
+    if c6(solution, input_data): score += 10
+    if c7(solution, input_data): score += 10
+    if c8(solution, input_data): score += 10
+    if c9(solution, input_data): score += 10
+    if c10(solution, input_data): score += 5
+    if c11(solution, input_data): score += 5
+
+    
+    return score
+
+def eval_solution_5(solution, input_data):
     score = 0
     c1, c2, c3, c4, c5 = (demand_constraint,                          
                         day_off_constraint,                          
@@ -206,31 +260,6 @@ def eval_solution_4(solution, input_data):
     if c3(solution, input_data): score += 10
     if c4(solution, input_data): score += 10
     if c5(solution, input_data): score += 10
-    
-    return score
-
-def eval_solution_5(solution, input_data):
-    score = 0
-    c1, c2, c3, c4, c5, c6, c7, c8, c9 = (demand_day_constraint,                          
-                        demand_afternoon_constraint,                          
-                        demand_night_constraint,                         
-                        min_day_off_constraint,                          
-                        max_day_off_constraint,
-                        min_length_work_blocks_constraint,
-                        max_length_work_blocks_constraint,
-                        forbidden_constraint2,
-                        forbidden_constraint3)
-
-    if c1(solution, input_data): score += 20
-    if c2(solution, input_data): score += 20
-    if c3(solution, input_data): score += 20
-    if c4(solution, input_data): score += 10
-    if c5(solution, input_data): score += 5
-    if c6(solution, input_data): score += 10
-    if c7(solution, input_data): score += 5
-    if c8(solution, input_data): score += 5
-    if c9(solution, input_data): score += 5
-
     
     return score
 
@@ -673,6 +702,61 @@ def move_2_forbidden_constraint3(result, input_data):
 
     return updated_result
 
+def replace(list_, element_1, element_2):
+    result = deepcopy(list_)
+    for i in range(len(result)):
+        if result[i] == element_1:
+            result[i] = element_2
+            break
+    return result
+
+def update_shift_employee_min(employee, shift, times):
+    result = deepcopy(employee)
+    for i in range(times):
+        counter = collections.Counter(result)
+        max_shifts = counter.most_common(1)[0][0]
+        if '-' in result:
+            max_shifts = '-'
+        else:
+            max_shifts = counter.most_common(1)[0][0]
+        result = replace(result, max_shifts, shift)
+    return result
+
+def move_min_length_of_shift_constraint(result, input_data):
+    updated_result = deepcopy(result)
+    if not min_length_of_shift_constraint(result, input_data):
+        for e in range(input_data['number_of_employees']):  
+            counter = collections.Counter(result[e])
+            for s in range(input_data['number_of_shifts']):
+                if index_to_shift(s) in counter:
+                    if input_data['min_length_of_blocks'][s] > counter[index_to_shift(s)]:
+                        updated_result[e] = update_shift_employee_min(updated_result[e], 
+                                                                      index_to_shift(s),
+                                                                     input_data['min_length_of_blocks'][s] - counter[index_to_shift(s)])
+                else:
+                    updated_result[e] = update_shift_employee_min(updated_result[e], 
+                                                                    index_to_shift(s),
+                                                                    input_data['min_length_of_blocks'][s])
+    return updated_result 
+
+def update_shift_employee_max(employee, shift, times):
+    result = deepcopy(employee)
+    for i in range(times):
+        result = replace(result, shift, '-')
+    return result
+
+def move_max_length_of_shift_constraint(result, input_data):
+    updated_result = deepcopy(result)
+    if not max_length_of_shift_constraint(result, input_data):
+        for e in range(input_data['number_of_employees']):  
+            counter = collections.Counter(result[e])
+            for s in range(input_data['number_of_shifts']):
+                if index_to_shift(s) in counter:
+                    if input_data['max_length_of_blocks'][s] < counter[index_to_shift(s)]:
+                        updated_result[e] = update_shift_employee_max(updated_result[e], 
+                                                                      index_to_shift(s),
+                                                                     counter[index_to_shift(s)] - input_data['max_length_of_blocks'][s])
+    return updated_result 
 
 # %% Simulated Annealing
 
@@ -725,6 +809,8 @@ def simulated_annealing(input_data, eval_function, T_max, r, termination_conditi
                 move_all_0_forbidden_constraint3,
                 move_all_1_forbidden_constraint3,
                 move_all_2_forbidden_constraint3,
+                move_min_length_of_shift_constraint,
+                move_max_length_of_shift_constraint,
             ]
 
             move_choice = random.choice(moves)
