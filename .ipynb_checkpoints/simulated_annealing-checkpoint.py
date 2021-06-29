@@ -23,12 +23,12 @@ def generate_random_solution(input_data):
 
 
 # %%
-def exp_probability(solution, neighbor, T, input_data):
-    return math.exp((eval_solution(neighbor, input_data) - eval_solution(solution, input_data))/T)
+def exp_probability(solution, eval_function, neighbor, T, input_data):
+    return math.exp((eval_function(neighbor, input_data) - eval_function(solution, input_data))/T)
 
 
 # %%
-def simulated_annealing(input_data, T_max, r, termination_condition, halting_condition):
+def simulated_annealing(input_data, eval_function, T_max, r, termination_condition, halting_condition):
     tc = 0
     hc = 0
     score = 100
@@ -39,7 +39,7 @@ def simulated_annealing(input_data, T_max, r, termination_condition, halting_con
     
     while hc < halting_condition:
         while tc < termination_condition:
-            if eval_solution(solution, input_data) == 100: 
+            if eval_function(solution, input_data) == 100: 
                 print(f'params: T_max={T_max}, r={r}, termination_condition={termination_condition}, halting_condition={halting_condition}')
                 return solution, best_solution
 
@@ -68,10 +68,10 @@ def simulated_annealing(input_data, T_max, r, termination_condition, halting_con
 
             move = random.choice(moves)(solution, input_data)
 
-            if eval_solution(solution, input_data) < eval_solution(move, input_data): solution = move
-            elif random.uniform(0, 1) < exp_probability(solution, move, T, input_data): solution = move
+            if eval_function(solution, input_data) < eval_function(move, input_data): solution = move
+            elif random.uniform(0, 1) < exp_probability(solution, eval_function, move, T, input_data): solution = move
             
-            if eval_solution(solution, input_data) > eval_solution(best_solution, input_data):
+            if eval_function(solution, input_data) > eval_function(best_solution, input_data):
                 best_solution = deepcopy(solution)
             tc += 1
             
@@ -94,42 +94,44 @@ def test_SA(T_max, r, termination_condition, halting_condition, show_non_optimal
             if not show_non_optimal:
                 print(example)
             solution, best_solution = solution
-            best_solutions.append((example, best_solution, eval_solution(best_solution, input_data)))
-            print(f'Best solution: {eval_solution(best_solution, input_data)}')
-            print(f'Last solution: {eval_solution(solution, input_data)}')
+            best_solutions.append((example, best_solution, eval_function(best_solution, input_data)))
+            print(f'Best solution: {eval_function(best_solution, input_data)}')
+            print(f'Last solution: {eval_function(solution, input_data)}')
             print('passed')
             print()
         else: 
             if show_non_optimal:
                 message, solution, best_solution = solution
-                best_solutions.append((example, best_solution, eval_solution(best_solution, input_data)))                
-                print(f'{message}. Best solution found has a score of: {eval_solution(best_solution, input_data)}')
-                print(f'Last solution: {eval_solution(solution, input_data)}')
+                best_solutions.append((example, best_solution, eval_function(best_solution, input_data)))                
+                print(f'{message}. Best solution found has a score of: {eval_function(best_solution, input_data)}')
+                print(f'Last solution: {eval_function(solution, input_data)}')
                 print('passed')
                 print()
     return best_solutions
 
 
 # %%
-def test_SA_per_example(example, T_max, r, termination_condition, halting_condition, show_non_optimal):
+def test_SA_per_example(example, eval_function, T_max, r, termination_condition, halting_condition, show_non_optimal):
     if show_non_optimal:
         print(example)
     input_data = read_data(example)
     solution = generate_random_solution(input_data)
-    solution = simulated_annealing(input_data, T_max, r, termination_condition, halting_condition)
+    best_solution = generate_random_solution(input_data)
+    solution = simulated_annealing(input_data, eval_function, T_max, r, termination_condition, halting_condition)
     if "Not satified in the given time" not in solution:
         if not show_non_optimal:
             print(example)
         solution, best_solution = solution
-        best_solutions.append((example, best_solution, eval_solution(best_solution, input_data)))
-        print(f'Best solution: {eval_solution(best_solution, input_data)}')
-        print(f'Last solution: {eval_solution(solution, input_data)}')
+        best_solutions.append((example, best_solution, eval_function(best_solution, input_data)))
+        print(f'Best solution: {eval_function(best_solution, input_data)}')
+        print(f'Last solution: {eval_function(solution, input_data)}')
         print('passed')
         print()
     else: 
         if show_non_optimal:
             message, solution, best_solution = solution
-            print(f'{message}. Best solution found has a score of: {eval_solution(best_solution, input_data)}')
-            print(f'Last solution: {eval_solution(solution, input_data)}')
+            print(f'{message}. Best solution found has a score of: {eval_function(best_solution, input_data)}')
+            print(f'Last solution: {eval_function(solution, input_data)}')
             print('passed')
             print()
+    return best_solution

@@ -13,24 +13,51 @@ from utils import *
 from evaluation import *
 
 def demand_constraint(result, input_data):
-    for e in range(input_data['number_of_employees']):
+    solution_demand = solution_to_demand(result, input_data['number_of_shifts'])
+    for s in range(input_data['number_of_shifts']):
         for d in range(input_data['length_of_schedule']):
-            sum_day, sum_afternoon, sum_night = 0, 0, 0
-            if result[e][d] == 'D': sum_day += 1
-            elif result[e][d] == 'A': sum_afternoon += 1
-            elif result[e][d] == 'N': sum_night += 1    
-        
-        if input_data['number_of_shifts'] > 2 :
-            if  sum_day >= input_data['temporal_requirements_matrix'][0][d] and sum_afternoon >= input_data['temporal_requirements_matrix'][1][d] and sum_night >= input_data['temporal_requirements_matrix'][2][d]:
-                pass
-            else:
-                return False
-        else:
-            if  sum_day >= input_data['temporal_requirements_matrix'][0][d] and sum_afternoon >= input_data['temporal_requirements_matrix'][1][d]:
-                pass
-            else:
+            if solution_demand[s][d] < input_data['temporal_requirements_matrix'][s][d]:
                 return False
     return True
+            
+def demand_day_constraint(result, input_data):
+    for e in range(input_data['number_of_employees']):
+        for d in range(input_data['length_of_schedule']):
+            sum_day = 0
+            if result[e][d] == 'D': sum_day += 1
+        
+            if sum_day >= input_data['temporal_requirements_matrix'][0][d]: pass
+            else: return False
+    return True
+
+def demand_afternoon_constraint(result, input_data):
+    for e in range(input_data['number_of_employees']):
+        for d in range(input_data['length_of_schedule']):
+            sum_afternoon = 0
+            if result[e][d] == 'A': sum_afternoon += 1
+        
+            if sum_afternoon >= input_data['temporal_requirements_matrix'][1][d]: pass
+            else: return False
+    return True
+
+def demand_night_constraint(result, input_data):
+    if input_data['number_of_shifts'] > 2 :
+        for e in range(input_data['number_of_employees']):
+            for d in range(input_data['length_of_schedule']):
+                sum_night = 0
+                if result[e][d] == 'N': sum_night += 1
+
+                if sum_night >= input_data['temporal_requirements_matrix'][2][d]: pass
+                else: return False
+    return True
+
+def shift_to_index(shift):
+    if shift == 'D': return 0
+    elif shift == 'A': return 1
+    elif shift == 'N': return 2
+    elif shift == '-': return 3
+    return False
+
 
 def day_off_constraint(result, input_data):
     for e in range(input_data['number_of_employees']):
