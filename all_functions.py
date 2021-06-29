@@ -7,11 +7,7 @@ import traceback
 
 import numpy as np
 
-from constraints import *
-from simulated_annealing import *
-from moves import *
-from utils import *
-from evaluation import *
+# %% Constraints
 
 def demand_constraint(result, input_data):
     solution_demand = solution_to_demand(result, input_data['number_of_shifts'])
@@ -103,19 +99,8 @@ def forbidden_constraint3(result, input_data):
                     if result[e][d] == f[0] and result[e][d+1] == f[1]                                             and result[e][d+2] == f[2]: return False
         return True
 
-import random
-from pprint import pprint
-import math
-from copy import deepcopy
-import time
-import traceback
+# %% Evaluation
 
-import numpy as np
-
-from simulated_annealing import *
-from moves import *
-import constraints 
-from utils import *
 
 def eval_solution(solution, input_data):
     score = 0
@@ -180,35 +165,23 @@ def eval_solution_4(solution, input_data):
     return score
 
 def report_solution(solution, input_data):
-    c1, c2, c3, c4, c5 = (constraints.demand_constraint,                          
-                        constraints.day_off_constraint,                          
-                        constraints.length_work_blocks_constraint,                         
-                        constraints.forbidden_constraint2,                          
-                        constraints.forbidden_constraint3)
+    c1, c2, c3, c4, c5 = (demand_constraint,                          
+                        day_off_constraint,                          
+                        length_work_blocks_constraint,                         
+                        forbidden_constraint2,                          
+                        forbidden_constraint3)
     return {
-        'demand_constraint': constraints.demand_constraint(solution, input_data),
-        'demand_day_constraint': constraints.demand_day_constraint(solution, input_data),
-        'demand_afternoon_constraint': constraints.demand_afternoon_constraint(solution, input_data),
-        'demand_night_constraint': constraints.demand_night_constraint(solution, input_data),
-        'day_off_constraint': constraints.day_off_constraint(solution, input_data),
-        'length_work_blocks_constraint': constraints.length_work_blocks_constraint(solution, input_data),
-        'forbidden_constraint2': constraints.forbidden_constraint2(solution, input_data),
-        'forbidden_constraint3': constraints.forbidden_constraint3(solution, input_data)
+        'demand_constraint': demand_constraint(solution, input_data),
+        'demand_day_constraint': demand_day_constraint(solution, input_data),
+        'demand_afternoon_constraint': demand_afternoon_constraint(solution, input_data),
+        'demand_night_constraint': demand_night_constraint(solution, input_data),
+        'day_off_constraint': day_off_constraint(solution, input_data),
+        'length_work_blocks_constraint': length_work_blocks_constraint(solution, input_data),
+        'forbidden_constraint2': forbidden_constraint2(solution, input_data),
+        'forbidden_constraint3': forbidden_constraint3(solution, input_data)
     }
 
-import random
-from pprint import pprint
-import math
-from copy import deepcopy
-import time
-import traceback
-
-import numpy as np
-
-from simulated_annealing import *
-from constraints import *
-from utils import *
-from evaluation import *
+# %% Moves
 
 def transpose_matrix(matrix):
     transposed_matrix = [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))]
@@ -608,22 +581,7 @@ def move_2_forbidden_constraint3(result, input_data):
         return updated_result
 
 
-#!/usr/bin/env python
-# coding: utf-8
-# %%
-import random
-from pprint import pprint
-import math
-from copy import deepcopy
-import time
-import traceback
-
-import numpy as np
-
-from moves import *
-from constraints import *
-from utils import *
-from evaluation import *
+# %% Simulated Annealing
 
 
 # %%
@@ -691,7 +649,8 @@ def simulated_annealing(input_data, eval_function, T_max, r, termination_conditi
     return "Not satified in the given time", solution, best_solution
 
 
-# %%
+# %% Simulated Annealing
+
 def test_SA(T_max, r, termination_condition, halting_condition, show_non_optimal):
     best_solutions = []
     for example in get_examples():
@@ -720,7 +679,6 @@ def test_SA(T_max, r, termination_condition, halting_condition, show_non_optimal
     return best_solutions
 
 
-# %%
 def test_SA_per_example(example, eval_function, T_max, r, termination_condition, halting_condition, show_non_optimal):
     if show_non_optimal:
         print(example)
@@ -746,19 +704,7 @@ def test_SA_per_example(example, eval_function, T_max, r, termination_condition,
             print()
     return best_solution
 
-import random
-from pprint import pprint
-import math
-from copy import deepcopy
-import time
-import traceback
-
-import numpy as np
-
-from simulated_annealing import *
-from moves import *
-from constraints import *
-from evaluation import *
+# %% Utils
 
 def read_data(filename):
     input_data = {}
