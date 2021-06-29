@@ -207,15 +207,15 @@ def eval_solution(solution, input_data):
                         optimize_sum
                         )
 
-    if c1(solution, input_data): score += 10
-    if c2(solution, input_data): score += 10
-    if c3(solution, input_data): score += 10
+    if c1(solution, input_data): score += 30
+    if c2(solution, input_data): score += 30
+    if c3(solution, input_data): score += 30
     if c4(solution, input_data): score += 10
     if c5(solution, input_data): score += 10
     if c6(solution, input_data): score += 10
     if c7(solution, input_data): score += 10
     if c8(solution, input_data): score += 10
-    if c9(solution, input_data): score += 10
+    if c9(solution, input_data): score += 30
     if c10(solution, input_data): score += 10
     if c11(solution, input_data): score += 10
     
