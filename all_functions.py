@@ -10,7 +10,6 @@ import numpy as np
 # %% Constraints
 
 def demand_constraint(result, input_data):
-    print(result)
     solution_demand = solution_to_demand(result, input_data['number_of_shifts'])
     for s in range(input_data['number_of_shifts']):
         for d in range(input_data['length_of_schedule']):
@@ -157,7 +156,6 @@ def eval_solution_4(solution, input_data):
                         length_work_blocks_constraint,                         
                         forbidden_constraint2,                          
                         forbidden_constraint3)
-    print('------------',solution)
     if c1(solution, input_data): score += 60
     if c2(solution, input_data): score += 10
     if c3(solution, input_data): score += 10
@@ -190,7 +188,6 @@ def transpose_matrix(matrix):
     return transposed_matrix
 
 def solution_to_demand(solution, numshifts):
-    print(solution, numshifts)
     demand = [[0 for i in range(len(solution[0]))] for i in range(numshifts)]
     for d in range(len(solution[0])):
         for e in range(len(solution)):
