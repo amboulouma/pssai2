@@ -207,17 +207,89 @@ def eval_solution(solution, input_data):
                         optimize_sum
                         )
 
-    if c1(solution, input_data): score += 30
-    if c2(solution, input_data): score += 30
-    if c3(solution, input_data): score += 30
+    if c1(solution, input_data): score += 15
+    if c2(solution, input_data): score += 15
+    if input_data['number_of_shifts'] > 2:
+        if c3(solution, input_data): 
+            score += 15
     if c4(solution, input_data): score += 10
     if c5(solution, input_data): score += 10
     if c6(solution, input_data): score += 10
     if c7(solution, input_data): score += 10
     if c8(solution, input_data): score += 10
-    if c9(solution, input_data): score += 30
+    if c9(solution, input_data): score += 15
     if c10(solution, input_data): score += 10
     if c11(solution, input_data): score += 10
+    
+    score -= calculate_optimization_sum(c12(solution, input_data))
+
+    return score
+
+def eval_solution_demand_weigth(solution, input_data):
+    score = 0
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12 = (
+                        demand_day_constraint,                          
+                        demand_afternoon_constraint,                          
+                        demand_night_constraint,                         
+                        min_day_off_constraint,                          
+                        max_day_off_constraint,
+                        min_length_work_blocks_constraint,
+                        max_length_work_blocks_constraint,
+                        forbidden_constraint2,
+                        forbidden_constraint3,
+                        min_length_of_shift_constraint,
+                        max_length_of_shift_constraint,
+                        optimize_sum
+                        )
+
+    if c1(solution, input_data): score += 20
+    if c2(solution, input_data): score += 20
+    if input_data['number_of_shifts'] > 2:
+        if c3(solution, input_data): 
+            score += 20
+    if c4(solution, input_data): score += 5
+    if c5(solution, input_data): score += 5
+    if c6(solution, input_data): score += 5
+    if c7(solution, input_data): score += 5
+    if c8(solution, input_data): score += 5
+    if c9(solution, input_data): score += 5
+    if c10(solution, input_data): score += 5
+    if c11(solution, input_data): score += 5
+    
+    score -= calculate_optimization_sum(c12(solution, input_data))
+
+    return score
+
+def eval_solution_day_off_weighted(solution, input_data):
+    score = 0
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12 = (
+                        demand_day_constraint,                          
+                        demand_afternoon_constraint,                          
+                        demand_night_constraint,                         
+                        min_day_off_constraint,                          
+                        max_day_off_constraint,
+                        min_length_work_blocks_constraint,
+                        max_length_work_blocks_constraint,
+                        forbidden_constraint2,
+                        forbidden_constraint3,
+                        min_length_of_shift_constraint,
+                        max_length_of_shift_constraint,
+                        optimize_sum
+                        )
+
+    if c1(solution, input_data): score += 10
+    if c2(solution, input_data): score += 10
+    if input_data['number_of_shifts'] > 2:
+        if c3(solution, input_data): 
+            score += 10
+    if c4(solution, input_data): score += 20
+    if c5(solution, input_data): score += 20
+    if c6(solution, input_data): score += 10
+    if c7(solution, input_data): score += 10
+    if c8(solution, input_data): score += 10
+    if c9(solution, input_data): score += 15
+    if c10(solution, input_data): score += 10
+    if c11(solution, input_data): score += 20
     
     score -= calculate_optimization_sum(c12(solution, input_data))
 
@@ -286,11 +358,12 @@ def eval_solution_4(solution, input_data):
     return score
 
 def report_solution(solution, input_data):
+    night_constraint = demand_night_constraint(solution, input_data) if input_data['number_of_shifts'] > 2 else None
     return {
         'demand_constraint': demand_constraint(solution, input_data),
         'demand_day_constraint': demand_day_constraint(solution, input_data),
         'demand_afternoon_constraint': demand_afternoon_constraint(solution, input_data),
-        'demand_night_constraint': demand_night_constraint(solution, input_data),
+        'demand_night_constraint': night_constraint,
         'day_off_constraint': day_off_constraint(solution, input_data),
         'min_day_off_constraint': min_day_off_constraint(solution, input_data),
         'max_day_off_constraint': max_day_off_constraint(solution, input_data),
