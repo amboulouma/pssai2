@@ -18,34 +18,24 @@ def demand_constraint(result, input_data):
     return True
 
 def demand_day_constraint(result, input_data):
-    for e in range(input_data['number_of_employees']):
-        for d in range(input_data['length_of_schedule']):
-            sum_day = 0
-            if result[e][d] == 'D': sum_day += 1
-        
-            if sum_day >= input_data['temporal_requirements_matrix'][0][d]: pass
-            else: return False
+    solution_demand = solution_to_demand(result, input_data['number_of_shifts'])
+    for d in range(input_data['length_of_schedule']):
+        if solution_demand[0][d] < input_data['temporal_requirements_matrix'][0][d]:
+            return False
     return True
 
 def demand_afternoon_constraint(result, input_data):
-    for e in range(input_data['number_of_employees']):
-        for d in range(input_data['length_of_schedule']):
-            sum_afternoon = 0
-            if result[e][d] == 'A': sum_afternoon += 1
-        
-            if sum_afternoon >= input_data['temporal_requirements_matrix'][1][d]: pass
-            else: return False
+    solution_demand = solution_to_demand(result, input_data['number_of_shifts'])
+    for d in range(input_data['length_of_schedule']):
+            if solution_demand[1][d] < input_data['temporal_requirements_matrix'][1][d]:
+                return False
     return True
 
 def demand_night_constraint(result, input_data):
-    if input_data['number_of_shifts'] > 2 :
-        for e in range(input_data['number_of_employees']):
-            for d in range(input_data['length_of_schedule']):
-                sum_night = 0
-                if result[e][d] == 'N': sum_night += 1
-
-                if sum_night >= input_data['temporal_requirements_matrix'][2][d]: pass
-                else: return False
+    solution_demand = solution_to_demand(result, input_data['number_of_shifts'])
+    for d in range(input_data['length_of_schedule']):
+            if solution_demand[2][d] < input_data['temporal_requirements_matrix'][2][d]:
+                return False
     return True
 
 def shift_to_index(shift):
@@ -58,10 +48,10 @@ def shift_to_index(shift):
 
 def day_off_constraint(result, input_data):
     for e in range(input_data['number_of_employees']):
-        count_dayoff = 0
+        count_day_off = 0
         for d in range(input_data['length_of_schedule']):
-            if result[e][d] == '-': count_dayoff += 1
-        if input_data['min_days_off'] <= count_dayoff <= input_data['max_days_off']: pass
+            if result[e][d] == '-': count_day_off += 1
+        if count_day_off >= input_data['min_days_off'] and count_day_off <= input_data['max_days_off']: pass
         else: return False
     return True
 
@@ -247,6 +237,18 @@ def move_all_demand_constraint(result, input_data):
         updated_result = transpose_matrix(solution)
     return updated_result
 
+def move_one_day_demand_constraint(result, input_data):
+    updated_result = deepcopy(result)
+    if not demand_constraint(updated_result, input_data):
+        solution = transpose_matrix(updated_result)
+        demand = transpose_matrix(input_data['temporal_requirements_matrix'])
+        max_days = len(input_data['temporal_requirements_matrix'][0]) - 1
+        random_day = random.randint(0, max_days)
+        solution[:][random_day] = adapt_solution_day(transpose_matrix(result)[:][random_day], demand[random_day][:])
+        solution = transpose_matrix(solution)
+        updated_result = solution
+    return updated_result    
+
 def move_day_demand_constraint(result, input_data):
     updated_result = deepcopy(result)
     if not demand_constraint(updated_result, input_data):
@@ -288,32 +290,38 @@ def move_night_demand_constraint(result, input_data):
     return updated_result
 
 def move_all_day_off_constraint(result, input_data):
+    count_day_off, min_days_off, max_days_off = 0,input_data['min_days_off'],input_data['max_days_off']
     updated_result = deepcopy(result)
     if not day_off_constraint(updated_result, input_data):
         code = input_data['shift_name'] + ['-']
         for e in range(input_data['number_of_employees']):
-            count_dayoff = 0
+            count_day_off = 0
             for d in range(input_data['length_of_schedule']):
-                if updated_result[e][d] == '-': count_dayoff += 1
-            if count_dayoff >= input_data['min_days_off']: pass
-            else: updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = '-'
-            if count_dayoff <= input_data['max_days_off']: pass
-            else: updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = random.choice(list(set(code) - set('-')))            
+                if updated_result[e][d] == '-': count_day_off += 1
+            if count_day_off >= input_data['min_days_off']: pass
+            else: 
+                while count_day_off <= min_days_off:
+                    updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = '-'
+                    count_day_off += 1
+            if count_day_off <= input_data['max_days_off']: pass
+            else: 
+                while count_day_off >= max_days_off:
+                    updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = random.choice(list(set(code) - set('-')))            
+                    count_day_off -= 1        
     return updated_result
 
-def move_min_day_off_constraint(result, input_data):
-    updated_result = deepcopy(result)
-    if not day_off_constraint(updated_result, input_data):
-        code = input_data['shift_name'] + ['-']
-        for e in range(input_data['number_of_employees']):
-            count_dayoff = 0
-            for d in range(input_data['length_of_schedule']):
-                if updated_result[e][d] == '-': count_dayoff += 1
-            if count_dayoff >= input_data['min_days_off']: pass
-            else: 
-                updated_result[e][random.randint(0, input_data['length_of_schedule']-1)] = '-'
-                break
-    return updated_result
+def day_off_constraint(result, input_data):
+    count_day_off = 0
+    for e in range(input_data['number_of_employees']):
+        count_day_off = 0
+        for d in range(input_data['length_of_schedule']):
+            if result[e][d] == '-': count_day_off += 1
+        if count_day_off >= input_data['min_days_off'] and count_day_off <= input_data['max_days_off']: 
+            continue
+        else: 
+            return False
+    return True
+
 
 def move_max_day_off_constraint(result, input_data):
     updated_result = deepcopy(result)
@@ -615,6 +623,7 @@ def simulated_annealing(input_data, eval_function, T_max, r, termination_conditi
 
             moves = [
                 move_day_demand_constraint,
+                move_one_day_demand_constraint,
                 move_afternoon_demand_constraint,
                 move_night_demand_constraint,
                 move_min_day_off_constraint,
@@ -687,6 +696,7 @@ def test_SA_per_example(example, eval_function, T_max, r, termination_condition,
         print(example)
     input_data = read_data(example)
     solution = simulated_annealing(input_data, eval_function, T_max, r, termination_condition, halting_condition)
+    best_solution = deepcopy(solution)
     if "Not satified in the given time" not in solution:
         if not show_non_optimal:
             print(example)
@@ -696,8 +706,8 @@ def test_SA_per_example(example, eval_function, T_max, r, termination_condition,
         print('passed')
         print()
     else: 
+        message, solution, best_solution = solution
         if show_non_optimal:
-            message, solution, best_solution = solution
             print(f'{message}. Best solution found has a score of: {eval_function(best_solution, input_data)}')
             print(f'Last solution: {eval_function(solution, input_data)}')
             print('passed')

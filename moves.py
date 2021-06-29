@@ -1,9 +1,15 @@
+# +
 import random
 from pprint import pprint
 import math
 from copy import deepcopy
 import time
 import traceback
+
+import random
+# -
+
+random.randint(0, 6)
 
 import numpy as np
 
